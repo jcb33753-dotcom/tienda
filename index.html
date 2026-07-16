@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14171c;
+    --ink-soft:#1e232b;
+    --paper:#eee9df;
+    --paper-dim:#c9c3b5;
+    --mustard:#e2a33d;
+    --sage:#7c9885;
+    --line: rgba(238,233,223,0.14);
+    --radius: 4px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Inter', system-ui, sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    margin:0;
+    font-weight:600;
+  }
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 32px;
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+    background:var(--ink);
+    z-index:10;
+  }
+  .topbar h1{font-size:22px; letter-spacing:0.3px;}
+  .topbar .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--paper-dim);
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-top:2px;
+  }
+  .mode-switch{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  button{
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    border:none;
+    border-radius:var(--radius);
+  }
+  .btn{
+    background:transparent;
+    color:var(--paper);
+    border:1px solid var(--line);
+    padding:9px 16px;
+    font-size:13px;
+    font-weight:500;
+    transition:border-color .15s, background .15s;
+  }
+  .btn:hover{border-color:var(--paper-dim);}
+  .btn-solid{
+    background:var(--mustard);
+    color:var(--ink);
+    border:1px solid var(--mustard);
+    font-weight:600;
+  }
+  .btn-solid:hover{filter:brightness(1.06);}
+  .btn-danger{
+    background:transparent;
+    color:#d97757;
+    border:1px solid rgba(217,119,87,0.4);
+  }
+  .btn-danger:hover{background:rgba(217,119,87,0.12);}
+
+  main{max-width:1100px; margin:0 auto; padding:36px 32px 80px;}
+
+  /* ---- Vista cliente ---- */
+  .empty-state{
+    text-align:center;
+    padding:100px 20px;
+    color:var(--paper-dim);
+  }
+  .empty-state h2{color:var(--paper); font-size:26px; margin-bottom:10px;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+    gap:28px;
+  }
+  .card{
+    background:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .card .thumb{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    background:#0d0f13;
+    display:block;
+  }
+  .card .thumb.placeholder{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--paper-dim);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+  }
+  .card .body{padding:16px 18px 18px; display:flex; flex-direction:column; gap:8px; flex:1;}
+  .card h3{font-size:17px; line-height:1.3;}
+  .card p{
+    margin:0;
+    font-size:13.5px;
+    color:var(--paper-dim);
+    line-height:1.5;
+    flex:1;
+  }
+  .price-tag{
+    align-self:flex-start;
+    position:relative;
+    background:var(--mustard);
+    color:var(--ink);
+    font-family:'JetBrains Mono', monospace;
+    font-weight:600;
+    font-size:14px;
+    padding:6px 14px 6px 18px;
+    clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
+    margin-top:4px;
+  }
+
+  /* ---- Panel admin ---- */
+  .admin-banner{
+    background:var(--sage);
+    color:var(--ink);
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    text-align:center;
+    padding:8px;
+  }
+  .panel{
+    background:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 28px;
+    margin-bottom:40px;
+  }
+  .panel h2{font-size:19px; margin-bottom:18px;}
+  .form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:14px;
+  }
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field.full{grid-column:1/-1;}
+  label{
+    font-size:12px;
+    color:var(--paper-dim);
+    font-family:'JetBrains Mono', monospace;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+  }
+  input[type=text], input[type=number], textarea{
+    background:var(--ink);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    color:var(--paper);
+    padding:10px 12px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+  }
+  textarea{resize:vertical; min-height:70px;}
+  input:focus, textarea:focus, button:focus-visible{
+    outline:2px solid var(--sage);
+    outline-offset:1px;
+  }
+  .upload-box{
+    border:1px dashed var(--line);
+    border-radius:var(--radius);
+    padding:14px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .upload-preview{
+    width:56px; height:56px;
+    border-radius:var(--radius);
+    object-fit:cover;
+    background:var(--ink);
+    flex-shrink:0;
+  }
+  .upload-preview.empty{
+    display:flex; align-items:center; justify-content:center;
+    color:var(--paper-dim); font-size:10px;
+  }
+  .admin-list{margin-top:8px;}
+  .admin-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 0;
+    border-top:1px solid var(--line);
+  }
+  .admin-row img{
+    width:48px; height:48px; object-fit:cover; border-radius:var(--radius); background:var(--ink);
+  }
+  .admin-row .info{flex:1; min-width:0;}
+  .admin-row .info h4{
+    font-family:'Inter', sans-serif;
+    font-size:14px; font-weight:600; margin:0 0 2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .admin-row .info span{font-size:12px; color:var(--paper-dim);}
+
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(0,0,0,0.55);
+    display:flex; align-items:center; justify-content:center;
+    z-index:100;
+  }
+  .modal{
+    background:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px;
+    width:280px;
+  }
+  .modal h3{font-size:16px; margin-bottom:14px;}
+  .modal input{width:100%; margin-bottom:14px;}
+  .modal .row{display:flex; gap:10px; justify-content:flex-end;}
+  .hidden{display:none !important;}
+  @media (max-width:640px){
+    .form-row{grid-template-columns:1fr;}
+    main{padding:24px 18px 60px;}
+    .topbar{padding:18px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Catálogo</h1>
+    <div class="tag" id="modeLabel">vista cliente</div>
+  </div>
+  <div class="mode-switch">
+    <button class="btn" id="toggleModeBtn">Entrar como administrador</button>
+  </div>
+</div>
+
+<div class="admin-banner hidden" id="adminBanner">Modo administrador — solo tú ves este panel</div>
+
+<main>
+
+  <!-- Panel de administrador (solo visible en modo admin) -->
+  <section class="panel hidden" id="adminPanel">
+    <h2 id="formTitle">Agregar producto</h2>
+    <form id="productForm">
+      <input type="hidden" id="editId">
+      <div class="upload-box">
+        <img id="uploadPreview" class="upload-preview empty" alt="">
+        <div>
+          <input type="file" id="imageInput" accept="image/*">
+          <div class="tag" style="margin-top:6px;">JPG o PNG, se ajusta automáticamente</div>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:14px;">
+        <div class="field">
+          <label>Nombre del producto</label>
+          <input type="text" id="nameInput" placeholder="Ej. Bolso tejido a mano" required>
+        </div>
+        <div class="field">
+          <label>Precio</label>
+          <input type="number" id="priceInput" placeholder="Ej. 12500" min="0" step="0.01" required>
+        </div>
+        <div class="field full">
+          <label>Descripción</label>
+          <textarea id="descInput" placeholder="Cuenta qué es, de qué está hecho, medidas..." required></textarea>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:6px;">
+        <button type="submit" class="btn btn-solid" id="submitBtn">Agregar producto</button>
+        <button type="button" class="btn hidden" id="cancelEditBtn">Cancelar edición</button>
+      </div>
+    </form>
+
+    <div class="admin-list" id="adminList"></div>
+  </section>
+
+  <!-- Vista pública -->
+  <div id="emptyState" class="empty-state hidden">
+    <h2>Todavía no hay productos</h2>
+    <p>Cuando agregues productos desde el panel de administrador, aparecerán aquí.</p>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+</main>
+
+<!-- Modal de contraseña -->
+<div class="modal-bg hidden" id="modalBg">
+  <div class="modal">
+    <h3>Acceso de administrador</h3>
+    <input type="text" id="pinInput" placeholder="Contraseña" autocomplete="off">
+    <div class="row">
+      <button class="btn" id="pinCancel">Cancelar</button>
+      <button class="btn btn-solid" id="pinConfirm">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+  Todo se guarda en localStorage, dentro del navegador de quien tiene abierta la página.
+  Esto significa: si subes productos en TU computadora, se verán en TU navegador.
+  Para que los clientes vean el catálogo desde OTRO dispositivo, esta página debe
+  publicarse en un servidor y los productos guardarse en una base de datos (no en localStorage).
+  El diseño ya está preparado para eso: solo habría que cambiar las funciones
+  loadProducts() y saveProducts() por llamadas a tu backend.
+*/
+
+const STORAGE_KEY = 'catalogo_productos';
+const ADMIN_PIN = '1234'; // Cámbiala por la que quieras usar
+
+let isAdmin = false;
+let editingId = null;
+
+// ---------- almacenamiento ----------
+function loadProducts(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  }catch(e){ return []; }
+}
+function saveProducts(list){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+// ---------- utilidades ----------
+function formatPrice(n){
+  const num = Number(n);
+  return '$' + num.toLocaleString('es-CR', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+}
+function resizeImage(file, maxSize=800){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let {width, height} = img;
+        if(width > height && width > maxSize){
+          height = Math.round(height * (maxSize/width));
+          width = maxSize;
+        }else if(height > maxSize){
+          width = Math.round(width * (maxSize/height));
+          height = maxSize;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ---------- render vista cliente ----------
+function renderGrid(){
+  const list = loadProducts();
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
+  if(list.length === 0){
+    empty.classList.remove('hidden');
+    grid.classList.add('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  grid.classList.remove('hidden');
+  list.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      ${p.image
+        ? `<img class="thumb" src="${p.image}" alt="${p.name}">`
+        : `<div class="thumb placeholder">sin imagen</div>`}
+      <div class="body">
+        <h3>${escapeHtml(p.name)}</h3>
+        <p>${escapeHtml(p.desc)}</p>
+        <span class="price-tag">${formatPrice(p.price)}</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ---------- render lista admin ----------
+function renderAdminList(){
+  const list = loadProducts();
+  const box = document.getElementById('adminList');
+  box.innerHTML = '';
+  list.forEach(p=>{
+    const row = document.createElement('div');
+    row.className = 'admin-row';
+    row.innerHTML = `
+      ${p.image ? `<img src="${p.image}">` : `<img>`}
+      <div class="info">
+        <h4>${escapeHtml(p.name)}</h4>
+        <span>${formatPrice(p.price)}</span>
+      </div>
+      <button class="btn" data-edit="${p.id}">Editar</button>
+      <button class="btn btn-danger" data-del="${p.id}">Eliminar</button>
+    `;
+    box.appendChild(row);
+  });
+  box.querySelectorAll('[data-edit]').forEach(b=>{
+    b.addEventListener('click', ()=> startEdit(b.dataset.edit));
+  });
+  box.querySelectorAll('[data-del]').forEach(b=>{
+    b.addEventListener('click', ()=> deleteProduct(b.dataset.del));
+  });
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ---------- formulario ----------
+let currentImageData = null;
+
+document.getElementById('imageInput').addEventListener('change', async e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  currentImageData = await resizeImage(file);
+  const preview = document.getElementById('uploadPreview');
+  preview.src = currentImageData;
+  preview.classList.remove('empty');
+});
+
+document.getElementById('productForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const name = document.getElementById('nameInput').value.trim();
+  const price = document.getElementById('priceInput').value;
+  const desc = document.getElementById('descInput').value.trim();
+  if(!name || !price || !desc) return;
+
+  const list = loadProducts();
+
+  if(editingId){
+    const idx = list.findIndex(p=>p.id === editingId);
+    if(idx > -1){
+      list[idx] = {
+        ...list[idx],
+        name, price, desc,
+        image: currentImageData || list[idx].image
+      };
+    }
+  }else{
+    list.push({
+      id: Date.now().toString(),
+      name, price, desc,
+      image: currentImageData || null
+    });
+  }
+  saveProducts(list);
+  resetForm();
+  renderAdminList();
+  renderGrid();
+});
+
+document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+function resetForm(){
+  editingId = null;
+  currentImageData = null;
+  document.getElementById('productForm').reset();
+  document.getElementById('uploadPreview').src = '';
+  document.getElementById('uploadPreview').classList.add('empty');
+  document.getElementById('formTitle').textContent = 'Agregar producto';
+  document.getElementById('submitBtn').textContent = 'Agregar producto';
+  document.getElementById('cancelEditBtn').classList.add('hidden');
+}
+
+function startEdit(id){
+  const list = loadProducts();
+  const p = list.find(p=>p.id === id);
+  if(!p) return;
+  editingId = id;
+  currentImageData = null;
+  document.getElementById('nameInput').value = p.name;
+  document.getElementById('priceInput').value = p.price;
+  document.getElementById('descInput').value = p.desc;
+  const preview = document.getElementById('uploadPreview');
+  if(p.image){
+    preview.src = p.image;
+    preview.classList.remove('empty');
+  }else{
+    preview.classList.add('empty');
+  }
+  document.getElementById('formTitle').textContent = 'Editar producto';
+  document.getElementById('submitBtn').textContent = 'Guardar cambios';
+  document.getElementById('cancelEditBtn').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function deleteProduct(id){
+  if(!confirm('¿Eliminar este producto?')) return;
+  const list = loadProducts().filter(p=>p.id !== id);
+  saveProducts(list);
+  if(editingId === id) resetForm();
+  renderAdminList();
+  renderGrid();
+}
+
+// ---------- modo administrador / cliente ----------
+const toggleBtn = document.getElementById('toggleModeBtn');
+const modalBg = document.getElementById('modalBg');
+const pinInput = document.getElementById('pinInput');
+
+toggleBtn.addEventListener('click', ()=>{
+  if(isAdmin){
+    setAdminMode(false);
+  }else{
+    modalBg.classList.remove('hidden');
+    pinInput.value = '';
+    pinInput.focus();
+  }
+});
+
+document.getElementById('pinCancel').addEventListener('click', ()=>{
+  modalBg.classList.add('hidden');
+});
+document.getElementById('pinConfirm').addEventListener('click', checkPin);
+pinInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') checkPin(); });
+
+function checkPin(){
+  if(pinInput.value === ADMIN_PIN){
+    modalBg.classList.add('hidden');
+    setAdminMode(true);
+  }else{
+    pinInput.style.outline = '2px solid #d97757';
+    setTimeout(()=> pinInput.style.outline = '', 800);
+  }
+}
+
+function setAdminMode(on){
+  isAdmin = on;
+  document.getElementById('adminPanel').classList.toggle('hidden', !on);
+  document.getElementById('adminBanner').classList.toggle('hidden', !on);
+  document.getElementById('modeLabel').textContent = on ? 'modo administrador' : 'vista cliente';
+  toggleBtn.textContent = on ? 'Salir del modo administrador' : 'Entrar como administrador';
+  if(on) renderAdminList();
+}
+
+// ---------- inicio ----------
+renderGrid();
+</script>
+</body>
+</html>
