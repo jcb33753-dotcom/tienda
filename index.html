@@ -338,7 +338,7 @@
 */
 
 const STORAGE_KEY = 'catalogo_productos';
-const ADMIN_PIN = '1234'; // Cámbiala por la que quieras usar
+const ADMIN_PIN = '2019'; // Cámbiala por la que quieras usar
 
 let isAdmin = false;
 let editingId = null;
@@ -356,7 +356,7 @@ function saveProducts(list){
 // ---------- utilidades ----------
 function formatPrice(n){
   const num = Number(n);
-  return '$' + num.toLocaleString('es-CR', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+  return '₡' + num.toLocaleString('es-CR', {minimumFractionDigits: 0, maximumFractionDigits: 2});
 }
 function resizeImage(file, maxSize=800){
   return new Promise((resolve, reject)=>{
